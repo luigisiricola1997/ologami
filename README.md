@@ -1,4 +1,5 @@
 # ologami
+
 AI-based predictive log analytics.
 
-<img src="./ologami.png" alt="Logo" width="200"/>
+`<img src="./.github/assets/logo.png" alt="Logo" width="200"/>`
