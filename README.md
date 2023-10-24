@@ -1,1 +1,3 @@
 # ologami
+
+![Logo](./ologami.png)
