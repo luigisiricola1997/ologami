@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ologami</title>
+</head>
+<body>
+
+<h1>NodeJS Logger</h1>
+
+<button id="clearLogs">Elimina Log</button>
+
+<div id="logs"></div>
+
+<script>
+  const ws = new WebSocket('ws://localhost:3000');
+  const clearLogsButton = document.getElementById('clearLogs');
+  const logDiv = document.getElementById('logs');
+
+  ws.addEventListener('message', (event) => {
+    const logs = JSON.parse(event.data);
+    logDiv.innerHTML = '';
+    logs.forEach(log => {
+      logDiv.innerHTML += `<p><strong>Message:</strong> ${log.message}, <strong>Type:</strong> ${log.type}, <strong>Timestamp:</strong> ${log.timestamp}</p>`;
+    });
+  });
+
+  clearLogsButton.addEventListener('click', () => {
+    fetch('http://localhost:3000/clear', {
+      method: 'POST'
+    }).then(response => {
+      if (response.ok) {
+        return response.text();
+      } else {
+        return Promise.reject('Failed to clear logs');
+      }
+    }).then(data => {
+      console.log(data);
+    }).catch(error => {
+      console.error(error);
+    });
+  });
+</script>
+
+</body>
+</html>

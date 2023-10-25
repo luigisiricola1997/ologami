@@ -1,8 +1,0 @@
-{
-    "name": "ologami-backend",
-    "version": "1.0.0",
-    "main": "ologami-backend.js",
-    "dependencies": {
-      "express": "^4.17.1"
-    }
-  }

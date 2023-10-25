@@ -2,20 +2,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ologami-backend-deployment
+  name: ologami-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ologami-backend
+      app: ologami
   template:
     metadata:
       labels:
-        app: ologami-backend
+        app: ologami
     spec:
       containers:
-      - name: ologami-backend
-        image: ologami-backend
+      - name: ologami
+        image: ologami
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
@@ -24,10 +24,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ologami-backend-service
+  name: ologami-service
 spec:
   selector:
-    app: ologami-backend
+    app: ologami
   ports:
     - protocol: TCP
       port: 3000
