@@ -1,6 +1,5 @@
 FROM node:14
 WORKDIR /nodejs-logger
-COPY package*.json ./
-RUN npm install
 COPY . .
+RUN npm install
 CMD ["node", "/nodejs-logger/nodejs-logger.js"]
