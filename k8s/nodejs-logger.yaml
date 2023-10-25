@@ -29,14 +29,6 @@ spec:
         envFrom:
         - configMapRef:
             name: nodejs-config
-        volumeMounts:
-        - name: log-volume
-          mountPath: /nodejs-logger/logs
-      volumes:
-      - name: log-volume
-        hostPath:
-          path: nodejs-logger
-          type: DirectoryOrCreate
 
 ---
 apiVersion: v1

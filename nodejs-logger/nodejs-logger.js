@@ -1,14 +1,12 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
 
 const app = express();
 const port = 3000;
 
-// Funzione per loggare su entrambi: file e console
+// Funzione per loggare su console
 const logMessage = (message) => {
   console.log(message);
-  fs.appendFileSync(path.join(__dirname, 'logs', 'error.log'), message + '\n');
 };
 
 app.get('/', (req, res) => {
