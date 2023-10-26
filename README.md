@@ -8,7 +8,6 @@ AI-based predictive log analytics.
 
 * Install Docker Desktop and enable Kubernetes.
 * Download the repository locally using git.
-* Build the image: `docker build -t nodejs-logger nodejs-logger/ --no-cache`.
-* Create k8s resources: `kubectl apply -f k8s/nodejs-logger.yaml`.
+* Run: `make local` to build and create k8s resources
 * Navigate to [http://localhost]() and try to request a page, like `/test` to see the error log.
 * That error log will be sent to ChatGPT 4 into a prompt to receive the log analysis.
