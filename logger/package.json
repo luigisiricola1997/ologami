@@ -1,7 +1,7 @@
 {
-    "name": "nodejs-logger",
+    "name": "logger",
     "version": "0.0.1",
-    "main": "nodejs-logger.js",
+    "main": "logger.js",
     "dependencies": {
       "express": "^4.17.1",
       "axios": "^0.21.1"

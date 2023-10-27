@@ -2,32 +2,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nodejs-logger-deployment
+  name: logger-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nodejs-logger
+      app: logger
   template:
     metadata:
       labels:
-        app: nodejs-logger
+        app: logger
     spec:
       containers:
-      - name: nodejs-logger
-        image: nodejs-logger
+      - name: logger
+        image: logger:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3001
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+          requests:
+            cpu: "1"
+            memory: "1Gi"
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: nodejs-logger-service
+  name: logger-service
 spec:
   selector:
-    app: nodejs-logger
+    app: logger
   ports:
     - protocol: TCP
       port: 3001

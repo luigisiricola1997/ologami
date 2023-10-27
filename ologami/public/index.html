@@ -5,18 +5,19 @@
 </head>
 <body>
 
-<h1>NodeJS Logger</h1>
+<h1>Logger</h1>
 
 <button id="clearLogs">Elimina Log</button>
+<button id="logAnalysisButton">Log Analysis</button>
 
 <div id="logs"></div>
+<div id="analysisResult"></div>
 
 <script>
   const ws = new WebSocket('ws://localhost:3000');
   const clearLogsButton = document.getElementById('clearLogs');
   const logDiv = document.getElementById('logs');
 
-  // Funzione per aggiungere log al div
   function addLog(log) {
     logDiv.innerHTML += `<p><strong>Message:</strong> ${log.message}, <strong>Type:</strong> ${log.type}, <strong>Timestamp:</strong> ${log.timestamp}</p>`;
   }
@@ -26,28 +27,44 @@
     logs.forEach(addLog);
   });
 
-  // Funzione per eliminare i log dalla pagina
   clearLogsButton.addEventListener('click', () => {
     logDiv.innerHTML = '';
   });
 
-  async function loadHistoricalLogs() {
+  document.getElementById('logAnalysisButton').addEventListener('click', async () => {
+    // Prendi tutti i log dal backend (aggiungi la logica per filtrare i log di oggi)
+    const logs = ["log1", "log2", "log3"]; // Esempio, sostituisci con i log reali
+
+    const prompt = `
+      I have an app in nodejs.
+      I have these error logs:
+      - ${logs.join('\n- ')}
+
+      Answer these questions:
+
+      1. Why do I have this error?
+      2. What should I evaluate in order to solve it?
+      3. Give me some predictive analysis of what might happen if I ignore this error.
+    `;
+
     try {
-      const response = await fetch('http://localhost:3000/historical-logs');
+      const response = await fetch('http://localhost:3000/logger/log-analysis/ai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt })
+      });
+
       if (response.ok) {
-        const logs = await response.json();
-        logs.forEach(addLog);
+        const data = await response.json();
+        document.getElementById('analysisResult').innerText = data.analysis;
       } else {
-        console.error('Failed to load historical logs');
+        console.error('Errore:', response.status, response.statusText);
       }
     } catch (error) {
-      console.error(error);
+      console.error('Si è verificato un errore:', error);
     }
-  }
-
-  // Carica i log storici quando la pagina viene caricata
-  document.addEventListener('DOMContentLoaded', () => {
-    loadHistoricalLogs();
   });
 </script>
 

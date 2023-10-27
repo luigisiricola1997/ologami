@@ -4,20 +4,18 @@ const axios = require('axios');
 const app = express();
 const port = 3001;
 
-// Funzione per loggare su console
 const logMessage = (message) => {
   console.log(message);
 };
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.send('Logger');
 });
 
 app.use(async (req, res, next) => {
   const errorMessage = `Errore 404: Pagina ${req.url} non trovata`;
   logMessage(errorMessage);
 
-  // Invia il log a Ologami
   try {
     await axios.post('http://ologami-service:3000/log', {
       message: errorMessage,
