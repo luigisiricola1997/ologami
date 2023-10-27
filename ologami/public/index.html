@@ -16,28 +16,38 @@
   const clearLogsButton = document.getElementById('clearLogs');
   const logDiv = document.getElementById('logs');
 
+  // Funzione per aggiungere log al div
+  function addLog(log) {
+    logDiv.innerHTML += `<p><strong>Message:</strong> ${log.message}, <strong>Type:</strong> ${log.type}, <strong>Timestamp:</strong> ${log.timestamp}</p>`;
+  }
+
   ws.addEventListener('message', (event) => {
     const logs = JSON.parse(event.data);
-    logDiv.innerHTML = '';
-    logs.forEach(log => {
-      logDiv.innerHTML += `<p><strong>Message:</strong> ${log.message}, <strong>Type:</strong> ${log.type}, <strong>Timestamp:</strong> ${log.timestamp}</p>`;
-    });
+    logs.forEach(addLog);
   });
 
+  // Funzione per eliminare i log dalla pagina
   clearLogsButton.addEventListener('click', () => {
-    fetch('http://localhost:3000/clear', {
-      method: 'POST'
-    }).then(response => {
+    logDiv.innerHTML = '';
+  });
+
+  async function loadHistoricalLogs() {
+    try {
+      const response = await fetch('http://localhost:3000/historical-logs');
       if (response.ok) {
-        return response.text();
+        const logs = await response.json();
+        logs.forEach(addLog);
       } else {
-        return Promise.reject('Failed to clear logs');
+        console.error('Failed to load historical logs');
       }
-    }).then(data => {
-      console.log(data);
-    }).catch(error => {
+    } catch (error) {
       console.error(error);
-    });
+    }
+  }
+
+  // Carica i log storici quando la pagina viene caricata
+  document.addEventListener('DOMContentLoaded', () => {
+    loadHistoricalLogs();
   });
 </script>
 
