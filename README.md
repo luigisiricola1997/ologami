@@ -10,4 +10,4 @@ AI-based predictive log analytics.
 * Download the repository locally using git.
 * Run: `make local` to build and create k8s resources
 * Navigate to [http://localhost]() and try to request a page, like `/test` to see the error log.
-* That error log will be sent to ChatGPT 4 into a prompt to receive the log analysis.
+* The current day logs are sent to ChatGPT and the log analysis is shown on Ologami webpage.
