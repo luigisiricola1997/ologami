@@ -58,10 +58,10 @@ app.post('/logger/log-analysis/ai', async (req, res) => {
       - ${logMessages.join('\n- ')}
 
       Answer these questions:
-
       1. Why do I have this error?
       2. What should I evaluate in order to solve it?
       3. Give me some predictive analysis of what might happen if I ignore this error.
+      4. Give me some code tips.
     `;
 
     // 3. Invia il prompt a ChatGPT
@@ -88,7 +88,6 @@ app.post('/logger/log-analysis/ai', async (req, res) => {
     console.error("Si è verificato un errore:", error);
     res.status(500).json({ error: "Si è verificato un errore interno del server" });
   }
-  res.status(200).json({ analysis });
 });
 
 const server = http.createServer(app);
