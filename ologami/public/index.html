@@ -32,28 +32,10 @@
   });
 
   document.getElementById('logAnalysisButton').addEventListener('click', async () => {
-    // Prendi tutti i log dal backend (aggiungi la logica per filtrare i log di oggi)
-    const logs = ["log1", "log2", "log3"]; // Esempio, sostituisci con i log reali
-
-    const prompt = `
-      I have an app in nodejs.
-      I have these error logs:
-      - ${logs.join('\n- ')}
-
-      Answer these questions:
-
-      1. Why do I have this error?
-      2. What should I evaluate in order to solve it?
-      3. Give me some predictive analysis of what might happen if I ignore this error.
-    `;
 
     try {
       const response = await fetch('http://localhost:3000/logger/log-analysis/ai', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ prompt })
+        method: 'POST'
       });
 
       if (response.ok) {
