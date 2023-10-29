@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ologami</title>
+  </head>
+  <body>
+    <h1>Logger</h1>
+
+    <button id="clearLogs">Elimina Log</button>
+    <button id="logAnalysisButton">Log Analysis</button>
+
+    <div id="logs"></div>
+    <div id="analysisResult"></div>
+
+    <script>
+      const ws = new WebSocket('ws://localhost:3000');
+      const clearLogsButton = document.getElementById('clearLogs');
+      const logDiv = document.getElementById('logs');
+
+      function addLog(log) {
+        logDiv.innerHTML += `<p><strong>Message:</strong> ${log.message}, <strong>Type:</strong> ${log.type}, <strong>Timestamp:</strong> ${log.timestamp}</p>`;
+      }
+
+      ws.addEventListener('message', (event) => {
+        const logs = JSON.parse(event.data);
+        logs.forEach(addLog);
+      });
+
+      clearLogsButton.addEventListener('click', () => {
+        logDiv.innerHTML = '';
+      });
+
+      document.getElementById('logAnalysisButton').addEventListener('click', async () => {
+
+        try {
+          const response = await fetch('http://localhost:3000/logger/log-analysis/ai', {
+            method: 'POST'
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            document.getElementById('analysisResult').innerText = data.analysis;
+          } else {
+            console.error('Errore:', response.status, response.statusText);
+          }
+        } catch (error) {
+          console.error('Si è verificato un errore:', error);
+        }
+      });
+    </script>
+  </body>
+</html>

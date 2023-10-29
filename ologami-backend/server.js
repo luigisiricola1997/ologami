@@ -5,8 +5,11 @@ const WebSocket = require('ws');
 const http = require('http');
 const { MongoClient } = require('mongodb');
 const OpenAI = require('openai');
+const cors = require('cors');
 
 const app = express();
+app.use(cors());
+
 const port = 3000;
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -14,7 +17,7 @@ let logs = [];
 
 // Connetti a MongoDB
 let db;
-const uri = "mongodb://root:root@mongodb-service:27017";
+const uri = "mongodb://root:root@mongodb:27017";
 MongoClient.connect(uri, { useUnifiedTopology: true }, (err, client) => {
   if (err) {
     console.error("Errore durante la connessione a MongoDB", err);
@@ -25,14 +28,6 @@ MongoClient.connect(uri, { useUnifiedTopology: true }, (err, client) => {
 });
 
 app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.send('Ologami');
-});
-
-app.get('/logger', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
-});
 
 app.post('/logger/log-analysis/ai', async (req, res) => {
   try {
