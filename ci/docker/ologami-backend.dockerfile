@@ -1,6 +1,6 @@
 FROM node:14
-WORKDIR /ologami
-RUN apt-get update && apt-get install -y dnsutils
+WORKDIR /ologami-backend
+RUN apt update && apt install -y dnsutils
 COPY package*.json ./
 RUN npm install
 COPY . .
