@@ -13,7 +13,7 @@
     <div id="analysisResult"></div>
 
     <script>
-      const ws = new WebSocket('ws://localhost:3000');
+      const ws = new WebSocket('ws://localhost/api');
       const clearLogsButton = document.getElementById('clearLogs');
       const logDiv = document.getElementById('logs');
 
@@ -33,7 +33,7 @@
       document.getElementById('logAnalysisButton').addEventListener('click', async () => {
 
         try {
-          const response = await fetch('http://localhost:3000/logger/log-analysis/ai', {
+          const response = await fetch('http://localhost/api/logger/log-analysis/ai', {
             method: 'POST'
           });
 

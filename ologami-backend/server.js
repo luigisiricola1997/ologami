@@ -8,28 +8,56 @@ const OpenAI = require('openai');
 const cors = require('cors');
 
 const app = express();
+const apiRouter = express.Router();
+
 app.use(cors());
+app.use('/api', apiRouter);
 
 const port = 3000;
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 let logs = [];
-
-// Connetti a MongoDB
 let db;
-const uri = "mongodb://root:root@mongodb:27017";
-MongoClient.connect(uri, { useUnifiedTopology: true }, (err, client) => {
-  if (err) {
+
+let retryCount = 0;
+const maxRetries = 3;
+
+async function connectToMongoDB() {
+  const uri = "mongodb://root:root@mongodb:27017";
+  try {
+    const client = await MongoClient.connect(uri, { useUnifiedTopology: true });
+    console.log("Connesso con successo a MongoDB");
+    db = client.db("logger");
+    retryCount = 0; // Reset the retry count upon successful connection
+  } catch (err) {
     console.error("Errore durante la connessione a MongoDB", err);
-    return;
+    retryCount++;
+    if (retryCount <= maxRetries) {
+      setTimeout(connectToMongoDB, 2000 * retryCount); // Wait for 2s, 4s, 6s, etc.
+    } else {
+      console.error("Raggiunto il numero massimo di tentativi di riconnessione a MongoDB");
+    }
   }
-  console.log("Connesso con successo a MongoDB");
-  db = client.db("logger");
+}
+
+// Inizializza la connessione a MongoDB
+connectToMongoDB();
+
+apiRouter.use(express.json());
+
+apiRouter.get('/health', async (req, res) => {
+  try {
+    if (!db) {
+      await connectToMongoDB();
+    }
+    await db.command({ ping: 1 });
+    res.status(200).send('OK');
+  } catch (e) {
+    res.status(500).send('MongoDB Disconnected');
+  }
 });
 
-app.use(express.json());
-
-app.post('/logger/log-analysis/ai', async (req, res) => {
+apiRouter.post('/logger/log-analysis/ai', async (req, res) => {
   try {
     // 1. Prendi tutti i log creati oggi da MongoDB
     const today = new Date();
@@ -85,19 +113,11 @@ app.post('/logger/log-analysis/ai', async (req, res) => {
   }
 });
 
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
-
-wss.on('connection', (ws) => {
-  ws.send(JSON.stringify(logs));
-});
-
-app.post('/log', async (req, res) => {
+apiRouter.post('/log', async (req, res) => {
   const { message, type, timestamp } = req.body;
   logs.push({ message, type, timestamp });
 
-  // Salva il log in MongoDB
-  if (db) {
+  if (db && db.serverConfig && db.serverConfig.isConnected()) {
     const collection = db.collection('logs');
     try {
       await collection.insertOne({ message, type, timestamp });
@@ -105,6 +125,8 @@ app.post('/log', async (req, res) => {
     } catch (err) {
       console.error("Errore durante l'inserimento del log", err);
     }
+  } else {
+    console.warn("MongoDB è disconnesso, il log non verrà salvato nel database");
   }
 
   wss.clients.forEach((client) => {
@@ -116,7 +138,7 @@ app.post('/log', async (req, res) => {
   res.status(200).send('Log ricevuto');
 });
 
-app.post('/clear', (req, res) => {
+apiRouter.post('/clear', (req, res) => {
   logs = [];
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
@@ -127,6 +149,13 @@ app.post('/clear', (req, res) => {
 });
 
 app.use(express.static('public'));
+
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+wss.on('connection', (ws) => {
+  ws.send(JSON.stringify(logs));
+});
 
 server.listen(port, () => {
   console.log(`Server in ascolto sulla porta ${port}`);

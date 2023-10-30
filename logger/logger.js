@@ -17,7 +17,7 @@ app.use(async (req, res, next) => {
   logMessage(errorMessage);
 
   try {
-    await axios.post('http://ologami-backend:3000/log', {
+    await axios.post('http://ologami-backend/api/log', {
       message: errorMessage,
       type: 'error',
       timestamp: new Date().toISOString()
