@@ -1,6 +1,6 @@
-FROM node:14
+FROM node:20.9.0-alpine
 WORKDIR /ologami-backend
-RUN apt update && apt install -y dnsutils
+RUN apk update && apk add bind-tools
 COPY package*.json ./
 RUN npm install
 COPY . .

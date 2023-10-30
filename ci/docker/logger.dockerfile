@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:20.9.0-alpine
 WORKDIR /logger
 COPY . .
 RUN npm install
