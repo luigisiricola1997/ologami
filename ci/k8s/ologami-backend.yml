@@ -17,7 +17,7 @@ spec:
       initContainers:
       - name: init-mongo
         image: busybox:1.28
-        command: ['sh', '-c', 'until nslookup mongodb; do echo waiting for mongo; sleep 2; done;']
+        command: ['sh', '-c', 'until nslookup ologami-mongodb; do echo waiting for mongo; sleep 2; done;']
       containers:
       - name: ologami-backend
         image: ologami-backend:latest
@@ -36,7 +36,7 @@ spec:
             command:
             - sh
             - -c
-            - "nslookup mongodb"
+            - "nslookup ologami-mongodb"
           initialDelaySeconds: 5
           periodSeconds: 5
 ---

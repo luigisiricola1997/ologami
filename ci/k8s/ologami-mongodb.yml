@@ -2,20 +2,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongodb
+  name: ologami-mongodb
   namespace: ologami
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mongodb
+      app: ologami-mongodb
   template:
     metadata:
       labels:
-        app: mongodb
+        app: ologami-mongodb
     spec:
       containers:
-      - name: mongodb
+      - name: ologami-mongodb
         image: mongo:latest
         ports:
         - containerPort: 27017
@@ -35,11 +35,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongodb
+  name: ologami-mongodb
   namespace: ologami
 spec:
   selector:
-    app: mongodb
+    app: ologami-mongodb
   ports:
     - protocol: TCP
       port: 27017

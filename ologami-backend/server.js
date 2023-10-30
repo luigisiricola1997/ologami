@@ -23,24 +23,24 @@ let retryCount = 0;
 const maxRetries = 3;
 
 async function connectToMongoDB() {
-  const uri = "mongodb://root:root@mongodb:27017";
+  const uri = "mongodb://root:root@ologami-mongodb:27017";
   try {
     const client = await MongoClient.connect(uri, { useUnifiedTopology: true });
-    console.log("Connesso con successo a MongoDB");
+    console.log("Connesso con successo a ologami-mongodb");
     db = client.db("logger");
     retryCount = 0; // Reset the retry count upon successful connection
   } catch (err) {
-    console.error("Errore durante la connessione a MongoDB", err);
+    console.error("Errore durante la connessione a ologami-mongodb", err);
     retryCount++;
     if (retryCount <= maxRetries) {
       setTimeout(connectToMongoDB, 2000 * retryCount); // Wait for 2s, 4s, 6s, etc.
     } else {
-      console.error("Raggiunto il numero massimo di tentativi di riconnessione a MongoDB");
+      console.error("Raggiunto il numfero massimo di tentativi di riconnessione a ologami-mongodb");
     }
   }
 }
 
-// Inizializza la connessione a MongoDB
+// Inizializza la connessione a ologami-mongodb
 connectToMongoDB();
 
 apiRouter.use(express.json());
@@ -53,7 +53,7 @@ apiRouter.get('/health', async (req, res) => {
     await db.command({ ping: 1 });
     res.status(200).send('OK');
   } catch (e) {
-    res.status(500).send('MongoDB Disconnected');
+    res.status(500).send('ologami-mongodb Disconnected');
   }
 });
 
@@ -100,7 +100,7 @@ apiRouter.post('/logger/log-analysis/ai', async (req, res) => {
 
     const analysis = chatCompletion.choices[0].message.content.trim();
 
-    // 4. Salva l'analisi in MongoDB
+    // 4. Salva l'analisi in ologami-mongodb
     const analysisCollection = db.collection('log-analysis');
     await analysisCollection.insertOne({ analysis, date: today.toISOString() });
 
@@ -113,20 +113,16 @@ apiRouter.post('/logger/log-analysis/ai', async (req, res) => {
   }
 });
 
-apiRouter.post('/log', async (req, res) => {
+apiRouter.post('/logger/post-logs', async (req, res) => {
   const { message, type, timestamp } = req.body;
   logs.push({ message, type, timestamp });
 
-  if (db && db.serverConfig && db.serverConfig.isConnected()) {
-    const collection = db.collection('logs');
-    try {
-      await collection.insertOne({ message, type, timestamp });
-      console.log("Log inserito con successo");
-    } catch (err) {
-      console.error("Errore durante l'inserimento del log", err);
-    }
-  } else {
-    console.warn("MongoDB è disconnesso, il log non verrà salvato nel database");
+  const collection = db.collection('logs');
+  try {
+    await collection.insertOne({ message, type, timestamp });
+    console.log("Log inserito con successo");
+  } catch (err) {
+    console.error("Errore durante l'inserimento del log", err);
   }
 
   wss.clients.forEach((client) => {

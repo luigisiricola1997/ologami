@@ -22,6 +22,7 @@
       }
 
       ws.addEventListener('message', (event) => {
+        logDiv.innerHTML = '';
         const logs = JSON.parse(event.data);
         logs.forEach(addLog);
       });
