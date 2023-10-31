@@ -1,9 +1,9 @@
 {
   "name": "ologami",
   "version": "0.0.1",
-  "main": "server.js",
+  "main": "backend.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node backend.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

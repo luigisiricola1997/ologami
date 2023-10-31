@@ -18,6 +18,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 let logs = [];
 let db;
+let wsServerIsRunning = false;
 
 let retryCount = 0;
 const maxRetries = 3;
@@ -28,32 +29,44 @@ async function connectToMongoDB() {
     const client = await MongoClient.connect(uri, { useUnifiedTopology: true });
     console.log("Connesso con successo a ologami-mongodb");
     db = client.db("logger");
-    retryCount = 0; // Reset the retry count upon successful connection
+    retryCount = 0;
   } catch (err) {
     console.error("Errore durante la connessione a ologami-mongodb", err);
     retryCount++;
     if (retryCount <= maxRetries) {
-      setTimeout(connectToMongoDB, 2000 * retryCount); // Wait for 2s, 4s, 6s, etc.
+      setTimeout(connectToMongoDB, 2000 * retryCount);
     } else {
-      console.error("Raggiunto il numfero massimo di tentativi di riconnessione a ologami-mongodb");
+      console.error("Raggiunto il numero massimo di tentativi di riconnessione a ologami-mongodb");
     }
   }
 }
 
-// Inizializza la connessione a ologami-mongodb
 connectToMongoDB();
 
 apiRouter.use(express.json());
 
 apiRouter.get('/health', async (req, res) => {
+  const healthStatus = {
+    mongodb: false,
+    websocket: false,
+    websocketClients: 0
+  };
+
   try {
     if (!db) {
       await connectToMongoDB();
     }
     await db.command({ ping: 1 });
-    res.status(200).send('OK');
+    healthStatus.mongodb = true;
+
+    healthStatus.websocketClients = wss.clients.size;
+    if (healthStatus.websocketClients > 0 && wsServerIsRunning) {
+      healthStatus.websocket = true;
+    }
+
+    res.status(200).json(healthStatus);
   } catch (e) {
-    res.status(500).send('ologami-mongodb Disconnected');
+    res.status(500).json({ error: `Healthcheck fallito: ${e.message}`, ...healthStatus });
   }
 });
 
@@ -155,4 +168,5 @@ wss.on('connection', (ws) => {
 
 server.listen(port, () => {
   console.log(`Server in ascolto sulla porta ${port}`);
+  wsServerIsRunning = true;
 });
