@@ -1,10 +1,7 @@
 import dotenv from 'dotenv'; 
 import { Router, Request, Response } from 'express';
-import { mongodb } from './mongodb';
-import { wss, wsServerIsRunning } from './websocket';
-import { addLog, clearLogs, logs } from './logManager';
+import { mongodb } from '../../../mongodb';
 import { OpenAI } from "openai";
-import WebSocket from 'ws';
 
 dotenv.config();
 
@@ -12,34 +9,9 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-const apiRouter = Router();
+const apiRouterLoggerLogAnalysisAi = Router();
 
-apiRouter.get('/health', async (req: Request, res: Response) => {
-  const healthStatus = {
-    mongodb: false,
-    websocket: wsServerIsRunning,  // Usa direttamente la variabile wsServerIsRunning
-    websocketClients: 0
-  };
-
-  try {
-    if (mongodb) {
-      await mongodb.command({ ping: 1 });
-      healthStatus.mongodb = true;
-    }
-
-    if (wss) {
-      healthStatus.websocketClients = wss.clients.size;
-    }
-
-    res.status(200).json(healthStatus);
-  } catch (e) {
-    if (e instanceof Error) {
-      res.status(500).json({ error: `Healthcheck fallito: ${e.message}`, ...healthStatus });
-    }
-  }
-});
-
-apiRouter.post('/logger/log-analysis/ai', async (req: Request, res: Response) => {
+apiRouterLoggerLogAnalysisAi.post('/logger/log-analysis/ai', async (req: Request, res: Response) => {
   try {
     // 1. Prendi tutti i log creati oggi da MongoDB
     const today = new Date();
@@ -97,33 +69,4 @@ apiRouter.post('/logger/log-analysis/ai', async (req: Request, res: Response) =>
   }
 });
 
-apiRouter.post('/logger/post-logs', async (req: Request, res: Response) => {
-  const { message, type, timestamp } = req.body;
-  addLog({ message, type, timestamp });
-  logs.push({ message, type, timestamp });
-
-  if(mongodb) {
-    const collection = mongodb.collection('logs');
-    try {
-      await collection.insertOne({ message, type, timestamp });
-      console.log("Log inserito con successo");
-    } catch (err) {
-      console.error("Errore durante l'inserimento del log", err);
-    }
-    if (wss) {
-      wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(logs));
-        }
-      });
-    }
-
-    res.status(200).send('Log ricevuto');
-  }
-});
-
-apiRouter.post('/clear', (req: Request, res: Response) => {
-  clearLogs();
-});
-
-export default apiRouter;
+export default apiRouterLoggerLogAnalysisAi;
