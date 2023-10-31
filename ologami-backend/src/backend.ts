@@ -3,7 +3,7 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import apiRouter from './routes';
-import { connectToMongoDB } from './db';
+import { connectToMongoDB } from './mongodb';
 import { initializeWebSocket } from './websocket';
 
 dotenv.config();

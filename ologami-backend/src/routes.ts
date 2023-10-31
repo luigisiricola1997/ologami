@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'; 
 import { Router, Request, Response } from 'express';
-import { db } from './db';
+import { mongodb } from './mongodb';
 import { wss, wsServerIsRunning } from './websocket';
 import { addLog, clearLogs, logs } from './logManager';
 import { OpenAI } from "openai";
@@ -17,21 +17,18 @@ const apiRouter = Router();
 apiRouter.get('/health', async (req: Request, res: Response) => {
   const healthStatus = {
     mongodb: false,
-    websocket: false,
+    websocket: wsServerIsRunning,  // Usa direttamente la variabile wsServerIsRunning
     websocketClients: 0
   };
 
   try {
-    if (db) {
-      await db.command({ ping: 1 });
+    if (mongodb) {
+      await mongodb.command({ ping: 1 });
       healthStatus.mongodb = true;
     }
 
     if (wss) {
       healthStatus.websocketClients = wss.clients.size;
-      if (healthStatus.websocketClients > 0 && wsServerIsRunning) {
-        healthStatus.websocket = true;
-      }
     }
 
     res.status(200).json(healthStatus);
@@ -49,8 +46,8 @@ apiRouter.post('/logger/log-analysis/ai', async (req: Request, res: Response) =>
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
-    if(db) {
-      const logCollection = db.collection('logs');
+    if(mongodb) {
+      const logCollection = mongodb.collection('logs');
       const logs = await logCollection.find({
         timestamp: {
           $gte: today.toISOString(),
@@ -87,7 +84,7 @@ apiRouter.post('/logger/log-analysis/ai', async (req: Request, res: Response) =>
         const analysis = chatCompletion.choices[0].message.content.trim();
 
         // 4. Salva l'analisi in ologami-mongodb
-        const analysisCollection = db.collection('log-analysis');
+        const analysisCollection = mongodb.collection('log-analysis');
         await analysisCollection.insertOne({ analysis, date: today.toISOString() });
 
         // 5. Invia l'analisi al frontend
@@ -105,8 +102,8 @@ apiRouter.post('/logger/post-logs', async (req: Request, res: Response) => {
   addLog({ message, type, timestamp });
   logs.push({ message, type, timestamp });
 
-  if(db) {
-    const collection = db.collection('logs');
+  if(mongodb) {
+    const collection = mongodb.collection('logs');
     try {
       await collection.insertOne({ message, type, timestamp });
       console.log("Log inserito con successo");
