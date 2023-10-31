@@ -1,0 +1,16 @@
+{
+  "name": "ologami",
+  "version": "0.0.1",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "ws": "^8.2.3",
+    "mongodb": "^4.1.2",
+    "openai": "^4.14.0",
+    "dotenv": "^10.0.0"
+  }
+}
