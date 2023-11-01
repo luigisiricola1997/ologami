@@ -3,18 +3,20 @@ FROM node:20.9.0-alpine AS build
 WORKDIR /ologami-backend
 RUN apk update && apk add bind-tools
 COPY package*.json ./
-RUN npm install
+RUN apk add --no-cache yarn && \
+    yarn install
 COPY . .
 COPY .env .env
-RUN npm run build
+RUN yarn run build
 
 # Fase di esecuzione
 FROM node:20.9.0-alpine
 WORKDIR /ologami-backend
 RUN apk update && apk add bind-tools
 COPY package*.json ./
-RUN npm install --production
+RUN apk add --no-cache yarn && \
+    yarn install --production
 COPY --from=build /ologami-backend/dist ./dist
 COPY .env .env
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+CMD ["yarn", "run", "start"]
