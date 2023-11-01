@@ -6,8 +6,8 @@
   <body>
     <h1>Logger</h1>
 
-    <button id="clearLogs">Elimina Log</button>
-    <button id="logAnalysisButton">Log Analysis</button>
+    <button id="clearLogs">Pulisci Logs</button>
+    <button id="logAnalysisButton">Logs AI Analysis</button>
 
     <div id="logs"></div>
     <div id="analysisResult"></div>
@@ -22,9 +22,23 @@
       }
 
       ws.addEventListener('message', (event) => {
-        logDiv.innerHTML = '';
-        const logs = JSON.parse(event.data);
-        logs.forEach(addLog);
+        if (!event.data) {
+          console.log("No log received yes.");
+          return;
+        }
+      
+        console.log("Received log:", event.data);
+        
+        try {
+          const log = JSON.parse(event.data);
+          console.log("Parsed log:", log);
+      
+          if (log && log.message && log.type && log.timestamp) {
+            addLog(log);
+          }
+        } catch (error) {
+          console.error("Log error parsing:", error);
+        }
       });
 
       clearLogsButton.addEventListener('click', () => {
@@ -42,10 +56,10 @@
             const data = await response.json();
             document.getElementById('analysisResult').innerText = data.analysis;
           } else {
-            console.error('Errore:', response.status, response.statusText);
+            console.error('Error:', response.status, response.statusText);
           }
         } catch (error) {
-          console.error('Si è verificato un errore:', error);
+          console.error('Error:', error);
         }
       });
     </script>

@@ -16,8 +16,6 @@ const apiRouterLoggerPostLogs = Router();
 
 apiRouterLoggerPostLogs.post('/logger/post-logs', async (req: Request, res: Response) => {
   const { message, type, timestamp } = req.body;
-  addLog({ message, type, timestamp });
-  logs.push({ message, type, timestamp });
 
   if(mongodb) {
     const collection = mongodb.collection('logs');
@@ -30,7 +28,7 @@ apiRouterLoggerPostLogs.post('/logger/post-logs', async (req: Request, res: Resp
     if (wss) {
       wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(logs));
+          client.send(JSON.stringify({ message, type, timestamp }));
         }
       });
     }
