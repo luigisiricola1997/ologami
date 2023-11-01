@@ -13,7 +13,6 @@ const apiRouterLoggerLogAnalysisAi = Router();
 
 apiRouterLoggerLogAnalysisAi.post('/logger/log-analysis/ai', async (req: Request, res: Response) => {
   try {
-    // 1. Prendi tutti i log creati oggi da MongoDB
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -27,7 +26,6 @@ apiRouterLoggerLogAnalysisAi.post('/logger/log-analysis/ai', async (req: Request
         }
       }).toArray();
 
-      // 2. Prepara il prompt per ChatGPT
       const logMessages = logs.map(log => log.message);
       const prompt = `
         I have an app in nodejs.
@@ -41,7 +39,6 @@ apiRouterLoggerLogAnalysisAi.post('/logger/log-analysis/ai', async (req: Request
         4. Give me some code tips.
       `;
 
-      // 3. Invia il prompt a ChatGPT
       const chatCompletion = await openai.chat.completions.create({
         messages: [
           { role: "user", content: prompt }
@@ -55,11 +52,9 @@ apiRouterLoggerLogAnalysisAi.post('/logger/log-analysis/ai', async (req: Request
       if (chatCompletion && chatCompletion.choices && chatCompletion.choices[0] && chatCompletion.choices[0].message && chatCompletion.choices[0].message.content) {
         const analysis = chatCompletion.choices[0].message.content.trim();
 
-        // 4. Salva l'analisi in ologami-mongodb
         const analysisCollection = mongodb.collection('log-analysis');
         await analysisCollection.insertOne({ analysis, date: today.toISOString() });
 
-        // 5. Invia l'analisi al frontend
         res.status(200).json({ analysis });
       }
     }

@@ -7,7 +7,7 @@ const apiRouterHealth = Router();
 apiRouterHealth.get('/health', async (req: Request, res: Response) => {
   const healthStatus = {
     mongodb: false,
-    websocket: wsServerIsRunning,  // Usa direttamente la variabile wsServerIsRunning
+    websocket: wsServerIsRunning,
     websocketClients: 0
   }; 
 
