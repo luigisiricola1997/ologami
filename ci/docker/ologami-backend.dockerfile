@@ -1,4 +1,3 @@
-# Fase di compilazione
 FROM node:20.9.0-alpine AS build
 WORKDIR /ologami-backend
 RUN apk update && apk add bind-tools
@@ -9,7 +8,6 @@ COPY . .
 COPY .env .env
 RUN yarn run build
 
-# Fase di esecuzione
 FROM node:20.9.0-alpine
 WORKDIR /ologami-backend
 RUN apk update && apk add bind-tools
