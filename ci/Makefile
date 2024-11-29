@@ -84,7 +84,7 @@ create-all: create-ingress-controller create-ologami create-logger
 	# Lancio il comando kubectl get po per vedere i pod fino a quando non sono tutti ready
 	@kubectl get pods -n ologami --watch &
 	@kubectl get pods -n ingress-nginx --watch &
-	@sleep 5 # Attendi che il watch venga inizializzato
+	@sleep 5 # Wait for the watch to initialize
 	@while [ $$(kubectl get pods -n ologami --no-headers | grep -v 'Running' | grep -v '1/1' | wc -l) -gt 0 ] || \
 	       [ $$(kubectl get pods -n ingress-nginx --no-headers | grep -v 'Running' | grep -v '1/1' | wc -l) -gt 0 ]; do \
 	       sleep 5; \
