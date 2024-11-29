@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ologami-frontend
+  name: ologami-fe
   namespace: ologami
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ologami-frontend
+      app: ologami-fe
   template:
     metadata:
       labels:
-        app: ologami-frontend
+        app: ologami-fe
     spec:
       containers:
-      - name: ologami-frontend
-        image: ologami-frontend:latest
+      - name: ologami-fe
+        image: ologami-fe:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
@@ -32,11 +32,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ologami-frontend
+  name: ologami-fe
   namespace: ologami
 spec:
   selector:
-    app: ologami-frontend
+    app: ologami-fe
   ports:
     - protocol: TCP
       port: 80

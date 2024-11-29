@@ -2,25 +2,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ologami-backend
+  name: ologami-be
   namespace: ologami
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ologami-backend
+      app: ologami-be
   template:
     metadata:
       labels:
-        app: ologami-backend
+        app: ologami-be
     spec:
       initContainers:
       - name: init-mongo
         image: busybox:1.28
         command: ['sh', '-c', 'until nc -z ologami-mongodb 27017; do echo waiting for mongo; sleep 2; done;']
       containers:
-      - name: ologami-backend
-        image: ologami-backend:latest
+      - name: ologami-be
+        image: ologami-be:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
@@ -31,6 +31,9 @@ spec:
           requests:
             cpu: "0.5"
             memory: "0.5Gi"
+        envFrom:
+        - secretRef:
+            name: ologami-be-env-secret
         readinessProbe:
           exec:
             command:
@@ -44,11 +47,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ologami-backend
+  name: ologami-be
   namespace: ologami
 spec:
   selector:
-    app: ologami-backend
+    app: ologami-be
   ports:
     - protocol: TCP
       port: 80

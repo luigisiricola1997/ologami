@@ -1,16 +1,8 @@
-import dotenv from 'dotenv'; 
 import { Router, Request, Response } from 'express';
 import { mongodb } from '../../mongodb';
 import { wss } from '../../websocket';
 import { addLog, logs } from '../../logManager';
-import { OpenAI } from "openai";
 import WebSocket from 'ws';
-
-dotenv.config();
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
 
 const apiRouterLoggerPostLogs = Router();
 

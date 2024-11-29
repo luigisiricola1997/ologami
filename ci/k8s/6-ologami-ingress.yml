@@ -13,13 +13,20 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: ologami-backend
+            name: ologami-be
             port:
               number: 3000
+      - path: /ai
+        pathType: Prefix
+        backend:
+          service:
+            name: ologami-ai
+            port:
+              number: 8000
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: ologami-frontend
+            name: ologami-fe
             port:
               number: 80

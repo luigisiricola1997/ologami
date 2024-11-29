@@ -6,7 +6,8 @@ import { connectToMongoDB } from './mongodb';
 import { initializeWebSocket } from './websocket';
 import apiRouterHealth from './routes/health';
 import apiRouterClear from './routes/clear';
-import apiRouterLoggerLogAnalysisAi from './routes/logger/log-analysis/ai';
+import apiRouterLoggerLogAnalysisHF from './routes/logger/log-analysis/hf';
+import apiRouterLoggerLogAnalysiscCGPT from './routes/logger/log-analysis/cgpt';
 import apiRouterLoggerPostLogs from './routes/logger/post-logs';
 
 dotenv.config();
@@ -18,7 +19,8 @@ app.use(
   '/api',
   apiRouterHealth,
   apiRouterClear,
-  apiRouterLoggerLogAnalysisAi,
+  apiRouterLoggerLogAnalysisHF,
+  apiRouterLoggerLogAnalysiscCGPT,
   apiRouterLoggerPostLogs
 );
 

@@ -1,74 +1,85 @@
 DOCKER_DIR = docker
 K8S_DIR = k8s
-FRONTEND_IMAGE = ologami-frontend:latest
-BACKEND_IMAGE = ologami-backend:latest
 LOGGER_IMAGE = logger:latest
+OLOGAMI_BE_IMAGE = ologami-be:latest
+OLOGAMI_FE_IMAGE = ologami-fe:latest
 
-NAMESPACE_YAML = $(K8S_DIR)/1-ologami-namespace.yml
-MONGODB_YAML = $(K8S_DIR)/2-ologami-mongodb.yml
-BACKEND_YAML = $(K8S_DIR)/3-ologami-backend.yml
-FRONTEND_YAML = $(K8S_DIR)/4-ologami-frontend.yml
-INGRESS_YAML = $(K8S_DIR)/5-ologami-ingress.yml
-LOGGER_YAML = $(K8S_DIR)/6-logger.yml
+CREATE_INGRESS_CONTROLLER = $(K8S_DIR)/0.1-create-ingress-controller.sh
+DELETE_INGRESS_CONTROLLER = $(K8S_DIR)/0.2-delete-ingress-controller.sh
+CREATE_OLOGAMI_BE_ENV_SECRET = $(K8S_DIR)/0.3-create-ologami-be-env-secret.sh
+DELETE_OLOGAMI_BE_ENV_SECRET = $(K8S_DIR)/0.4-delete-ologami-be-env-secret.sh
+OLOGAMI_NAMESPACE_YAML = $(K8S_DIR)/1-ologami-namespace.yml
+OLOGAMI_MONGODB_YAML = $(K8S_DIR)/2-ologami-mongodb.yml
+OLOGAMI_BE_YAML = $(K8S_DIR)/3-ologami-be.yml
+OLOGAMI_FE_YAML = $(K8S_DIR)/4-ologami-fe.yml
+LOGGER_YAML = $(K8S_DIR)/5-logger.yml
+OLOGAMI_INGRESS_YAML = $(K8S_DIR)/6-ologami-ingress.yml
 
-INSTALL_INGRESS = $(K8S_DIR)/0.1-ingress-controller-install.sh
-UNINSTALL_INGRESS = $(K8S_DIR)/0.2-ingress-controller-uninstall.sh
+build-ologami-fe:
+	docker build -t $(OLOGAMI_FE_IMAGE) -f $(DOCKER_DIR)/ologami-fe.dockerfile ../ologami-fe/ --no-cache
 
-build-ologami-frontend:
-	docker build -t $(FRONTEND_IMAGE) -f $(DOCKER_DIR)/ologami-frontend.dockerfile ../ologami-frontend/ --no-cache
-
-build-ologami-backend:
-	docker build -t $(BACKEND_IMAGE) -f $(DOCKER_DIR)/ologami-backend.dockerfile ../ologami-backend/ --no-cache
+build-ologami-be:
+	docker build -t $(OLOGAMI_BE_IMAGE) -f $(DOCKER_DIR)/ologami-be.dockerfile ../ologami-be/ --no-cache
 
 build-logger:
 	docker build -t $(LOGGER_IMAGE) -f $(DOCKER_DIR)/logger.dockerfile ../logger/ --no-cache
 
-build-all: build-ologami-frontend build-ologami-backend build-logger
+build-all: build-ologami-fe build-ologami-be build-logger
 
-delete-namespace:
-	kubectl delete -f $(NAMESPACE_YAML) --ignore-not-found || true
+create-ingress-controller:
+	bash $(CREATE_INGRESS_CONTROLLER)
 
-delete-mongodb:
-	kubectl delete -f $(MONGODB_YAML) --ignore-not-found || true
+create-ologami-be-env-secret:
+	bash $(CREATE_OLOGAMI_BE_ENV_SECRET)
 
-delete-backend:
-	kubectl delete -f $(BACKEND_YAML) --ignore-not-found || true
+create-ologami-namespace:
+	kubectl apply -f $(OLOGAMI_NAMESPACE_YAML)
 
-delete-frontend:
-	kubectl delete -f $(FRONTEND_YAML) --ignore-not-found || true
+create-ologami-mongodb:
+	kubectl apply -f $(OLOGAMI_MONGODB_YAML)
 
-delete-ingress:
-	kubectl delete -f $(INGRESS_YAML) --ignore-not-found || true
+create-ologami-be:
+	kubectl apply -f $(OLOGAMI_BE_YAML)
+
+create-ologami-fe:
+	kubectl apply -f $(OLOGAMI_FE_YAML)
+
+create-logger:
+	kubectl apply -f $(LOGGER_YAML)
+
+create-ologami-ingress:
+	kubectl wait --namespace ingress-nginx --for=condition=available --timeout=300s deployment/ingress-nginx-controller
+	kubectl apply -f $(OLOGAMI_INGRESS_YAML)
+
+delete-ingress-controller:
+	bash $(DELETE_INGRESS_CONTROLLER)
+
+delete-ologami-be-env-secret:
+	./$(DELETE_OLOGAMI_BE_ENV_SECRET) || true
+
+delete-ologami-namespace:
+	kubectl delete -f $(OLOGAMI_NAMESPACE_YAML) --ignore-not-found || true
+
+delete-ologami-mongodb:
+	kubectl delete -f $(OLOGAMI_MONGODB_YAML) --ignore-not-found || true
+
+delete-ologami-be:
+	kubectl delete -f $(OLOGAMI_BE_YAML) --ignore-not-found || true
+
+delete-ologami-fe:
+	kubectl delete -f $(OLOGAMI_FE_YAML) --ignore-not-found || true
 
 delete-logger:
 	kubectl delete -f $(LOGGER_YAML) --ignore-not-found || true
 
-create-namespace:
-	kubectl apply -f $(NAMESPACE_YAML)
+delete-ologami-ingress:
+	kubectl delete -f $(OLOGAMI_INGRESS_YAML) --ignore-not-found || true
 
-create-mongodb:
-	kubectl apply -f $(MONGODB_YAML)
+delete-ologami: delete-ologami-ingress delete-ologami-be delete-ologami-fe delete-ologami-mongodb delete-ologami-be-env-secret
+delete-all: delete-ingress-controller delete-logger delete-ologami
 
-create-backend:
-	kubectl apply -f $(BACKEND_YAML)
-
-create-frontend:
-	kubectl apply -f $(FRONTEND_YAML)
-
-create-ingress:
-	kubectl wait --namespace ingress-nginx --for=condition=available --timeout=300s deployment/ingress-nginx-controller
-	kubectl apply -f $(INGRESS_YAML)
-	@echo "Ingress resources created successfully."
-
-create-logger:
-	kubectl apply -f $(LOGGER_YAML)
-	@echo "Logger resources created successfully."
-
-delete-ologami: delete-ingress delete-frontend delete-backend delete-mongodb delete-logger delete-namespace
-delete-all: uninstall-ingress delete-ologami
-
-create-ologami: create-namespace create-mongodb create-backend create-frontend create-ingress create-logger
-create-all: install-ingress create-ologami
+create-ologami: create-ologami-namespace create-ologami-ingress create-ologami-be create-ologami-fe create-ologami-mongodb create-ologami-be-env-secret
+create-all: create-ingress-controller create-ologami create-logger
 	@echo "All resources created successfully. Waiting for all pods to be ready..."
 	# Lancio il comando kubectl get po per vedere i pod fino a quando non sono tutti ready
 	@kubectl get pods -n ologami --watch &
@@ -76,40 +87,18 @@ create-all: install-ingress create-ologami
 	@sleep 5 # Attendi che il watch venga inizializzato
 	@while [ $$(kubectl get pods -n ologami --no-headers | grep -v 'Running' | grep -v '1/1' | wc -l) -gt 0 ] || \
 	       [ $$(kubectl get pods -n ingress-nginx --no-headers | grep -v 'Running' | grep -v '1/1' | wc -l) -gt 0 ]; do \
-	        sleep 5; \
+	       sleep 5; \
 	done
 	@echo "All pods are ready!"
-	# Il comando watch si fermerà automaticamente quando questo comando termina
 
 recreate-%:
 	kubectl delete -f $(K8S_DIR)/*$*.yml --ignore-not-found || true
 	kubectl apply -f $(K8S_DIR)/*$*.yml
-	@echo "$* recreated successfully."
 
 rebuild-%: build-% recreate-% 
-	@echo "$* rebuilt and redeployed successfully."
 
-install-ingress:
-	bash $(INSTALL_INGRESS)
-	@echo "Ingress controller installed successfully."
-
-uninstall-ingress:
-	bash $(UNINSTALL_INGRESS) || true
-	@echo "Ingress controller uninstallation attempted."
-
-local: build-all delete-all create-all
+local: build-all create-all
 
 clean:
-	docker system prune -f
 	kubectl delete all --all -n ologami || true
-
-help:
-	@echo "Makefile Targets:"
-	@echo "  build-all          - Build all Docker images"
-	@echo "  delete-all         - Delete all Kubernetes resources"
-	@echo "  create-all         - Create all Kubernetes resources"
-	@echo "  rebuild-backend    - Rebuild and redeploy the backend"
-	@echo "  local              - Build and deploy locally"
-	@echo "  clean              - Clean up Docker and Kubernetes residuals"
-	@echo "  install-ingress    - Install ingress controller"
-	@echo "  uninstall-ingress  - Uninstall ingress controller"
+	docker system prune -f
