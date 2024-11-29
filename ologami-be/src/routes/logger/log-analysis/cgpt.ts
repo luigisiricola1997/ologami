@@ -1,9 +1,6 @@
-import dotenv from 'dotenv'; 
 import { Router, Request, Response } from 'express';
 import { mongodb } from '../../../mongodb';
 import { OpenAI } from "openai";
-
-dotenv.config();
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
@@ -43,7 +40,7 @@ apiRouterLoggerLogAnalysisAi.post('/logger/log-analysis/cgpt', async (req: Reque
                 messages: [
                     { role: "user", content: prompt }
                 ],
-                model: "gpt-3.5-turbo"
+                model: `${process.env.OPENAI_MODEL}`
             });
 
             console.log("Valore di logMessages:", logMessages);
