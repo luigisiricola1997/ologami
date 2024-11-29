@@ -4,6 +4,6 @@
     "main": "logger.js",
     "dependencies": {
       "express": "^4.17.1",
-      "axios": "^0.21.1"
+      "axios": ">=0.28.0"
     }
   }
