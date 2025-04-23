@@ -38,7 +38,7 @@ create-ologami-namespace:
 create-ologami-mongodb:
 	kubectl apply -f $(OLOGAMI_MONGODB_YAML)
 
-create-ologami-be:
+create-ologami-be: create-ologami-be-env-secret
 	kubectl apply -f $(OLOGAMI_BE_YAML)
 
 create-ologami-fe:
@@ -63,7 +63,7 @@ delete-ologami-namespace:
 delete-ologami-mongodb:
 	kubectl delete -f $(OLOGAMI_MONGODB_YAML) --ignore-not-found || true
 
-delete-ologami-be:
+delete-ologami-be: delete-ologami-be-env-secret
 	kubectl delete -f $(OLOGAMI_BE_YAML) --ignore-not-found || true
 
 delete-ologami-fe:
