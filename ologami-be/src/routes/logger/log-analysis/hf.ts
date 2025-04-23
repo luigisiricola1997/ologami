@@ -68,7 +68,7 @@ apiRouterLoggerLogAnalysisHF.post('/logger/log-analysis/hf', async (req: Request
         headers: {
           Authorization: `Bearer ${HF_AUTH_TOKEN}`,
         },
-        timeout: 10000,
+        timeout: 30000,
       }
     );
 
