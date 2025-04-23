@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PATH=$PATH:/c/Program\ Files/Git/bin:/C/Program\ Files/Git/bin/helm.exe
+# export PATH=$PATH:/c/Program\ Files/Git/bin:/C/Program\ Files/Git/bin/helm.exe
 
 if ! helm status ingress-nginx -n ingress-nginx >/dev/null 2>&1; then
     echo "Installing ingress controller..."

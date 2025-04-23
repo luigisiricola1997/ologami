@@ -1,5 +1,5 @@
-DOCKER_DIR = docker
-K8S_DIR = k8s
+DOCKER_DIR = ci/docker
+K8S_DIR = ci/k8s
 LOGGER_IMAGE = logger:latest
 OLOGAMI_BE_IMAGE = ologami-be:latest
 OLOGAMI_FE_IMAGE = ologami-fe:latest
@@ -16,13 +16,13 @@ LOGGER_YAML = $(K8S_DIR)/5-logger.yml
 OLOGAMI_INGRESS_YAML = $(K8S_DIR)/6-ologami-ingress.yml
 
 build-ologami-fe:
-	docker build -t $(OLOGAMI_FE_IMAGE) -f $(DOCKER_DIR)/ologami-fe.dockerfile ../ologami-fe/ --no-cache
+	docker build -t $(OLOGAMI_FE_IMAGE) -f $(DOCKER_DIR)/ologami-fe.dockerfile ologami-fe/ --no-cache
 
 build-ologami-be:
-	docker build -t $(OLOGAMI_BE_IMAGE) -f $(DOCKER_DIR)/ologami-be.dockerfile ../ologami-be/ --no-cache
+	docker build -t $(OLOGAMI_BE_IMAGE) -f $(DOCKER_DIR)/ologami-be.dockerfile ologami-be/ --no-cache
 
 build-logger:
-	docker build -t $(LOGGER_IMAGE) -f $(DOCKER_DIR)/logger.dockerfile ../logger/ --no-cache
+	docker build -t $(LOGGER_IMAGE) -f $(DOCKER_DIR)/logger.dockerfile logger/ --no-cache
 
 build-all: build-ologami-fe build-ologami-be build-logger
 
@@ -30,7 +30,7 @@ create-ingress-controller:
 	bash $(CREATE_INGRESS_CONTROLLER)
 
 create-ologami-be-env-secret:
-	bash $(CREATE_OLOGAMI_BE_ENV_SECRET)
+	bash $(CREATE_OLOGAMI_BE_ENV_SECRET) | true
 
 create-ologami-namespace:
 	kubectl apply -f $(OLOGAMI_NAMESPACE_YAML)
@@ -52,10 +52,10 @@ create-ologami-ingress:
 	kubectl apply -f $(OLOGAMI_INGRESS_YAML)
 
 delete-ingress-controller:
-	bash $(DELETE_INGRESS_CONTROLLER)
+	bash $(DELETE_INGRESS_CONTROLLER) || true
 
 delete-ologami-be-env-secret:
-	./$(DELETE_OLOGAMI_BE_ENV_SECRET) || true
+	bash $(DELETE_OLOGAMI_BE_ENV_SECRET) || true
 
 delete-ologami-namespace:
 	kubectl delete -f $(OLOGAMI_NAMESPACE_YAML) --ignore-not-found || true
@@ -81,13 +81,12 @@ delete-all: delete-ingress-controller delete-logger delete-ologami
 create-ologami: create-ologami-namespace create-ologami-ingress create-ologami-be create-ologami-fe create-ologami-mongodb create-ologami-be-env-secret
 create-all: create-ingress-controller create-ologami create-logger
 	@echo "All resources created successfully. Waiting for all pods to be ready..."
-	# Lancio il comando kubectl get po per vedere i pod fino a quando non sono tutti ready
 	@kubectl get pods -n ologami --watch &
 	@kubectl get pods -n ingress-nginx --watch &
-	@sleep 5 # Wait for the watch to initialize
+	@sleep 5
 	@while [ $$(kubectl get pods -n ologami --no-headers | grep -v 'Running' | grep -v '1/1' | wc -l) -gt 0 ] || \
-	       [ $$(kubectl get pods -n ingress-nginx --no-headers | grep -v 'Running' | grep -v '1/1' | wc -l) -gt 0 ]; do \
-	       sleep 5; \
+		[ $$(kubectl get pods -n ingress-nginx --no-headers | grep -v 'Running' | grep -v '1/1' | wc -l) -gt 0 ]; do \
+		sleep 5; \
 	done
 	@echo "All pods are ready!"
 
