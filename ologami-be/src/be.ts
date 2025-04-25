@@ -7,7 +7,7 @@ import { initializeWebSocket } from './websocket';
 import apiRouterHealth from './routes/health';
 import apiRouterClear from './routes/clear';
 import apiRouterLoggerLogAnalysisHF from './routes/logger/log-analysis/hf';
-import apiRouterLoggerLogAnalysiscCGPT from './routes/logger/log-analysis/cgpt';
+import apiRouterLoggerLogAnalysiscOpenAI from './routes/logger/log-analysis/openai';
 import apiRouterLoggerPostLogs from './routes/logger/post-logs';
 
 dotenv.config();
@@ -20,7 +20,7 @@ app.use(
   apiRouterHealth,
   apiRouterClear,
   apiRouterLoggerLogAnalysisHF,
-  apiRouterLoggerLogAnalysiscCGPT,
+  apiRouterLoggerLogAnalysiscOpenAI,
   apiRouterLoggerPostLogs
 );
 

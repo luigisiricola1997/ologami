@@ -8,14 +8,18 @@ const openai = new OpenAI({
 
 const apiRouterLoggerLogAnalysisAi = Router();
 
-apiRouterLoggerLogAnalysisAi.post('/logger/log-analysis/cgpt', async (req: Request, res: Response) => {
+apiRouterLoggerLogAnalysisAi.post('/logger/log-analysis/openai', async (req: Request, res: Response) => {
     try {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const tomorrow = new Date(today);
         tomorrow.setDate(today.getDate() + 1);
         if(mongodb) {
-            const logCollection = mongodb.collection('logs');
+            interface LogDocument {
+                message: string;
+                timestamp: string;
+            }
+            const logCollection = mongodb.collection<LogDocument>('logs');
             const logs = await logCollection.find({
                 timestamp: {
                     $gte: today.toISOString(),
@@ -23,7 +27,7 @@ apiRouterLoggerLogAnalysisAi.post('/logger/log-analysis/cgpt', async (req: Reque
                 }
             }).toArray();
 
-            const logMessages = logs.map(log => log.message);
+            const logMessages: string[] = logs.map((log: { message: string }) => log.message);
             const prompt = `
                 I have an app in nodejs.
                 I have these error logs:

@@ -53,7 +53,7 @@
 <div class="flex flex-wrap justify-center gap-2 mb-4">
   <button class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded" on:click={clearLogs}>Clear Logs</button>
   <button class="bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded" on:click={() => fetchAnalysis('hf')}>Analyze Logs (HF)</button>
-  <button class="bg-green-700 hover:bg-green-600 px-4 py-2 rounded" on:click={() => fetchAnalysis('cgpt')}>Analyze Logs (CGPT)</button>
+  <button class="bg-green-700 hover:bg-green-600 px-4 py-2 rounded" on:click={() => fetchAnalysis('openai')}>Analyze Logs (OpenAI)</button>
 </div>
 
 <div class="space-y-2">
