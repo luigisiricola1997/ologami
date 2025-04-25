@@ -13,7 +13,10 @@ It leverages machine learning models to provide insights and recommendations bas
 
 ### Prerequisites
 
-To run the project locally, you can simply use Docker Desktop + Kubernetes
+- Docker
+- Kubernetes
+- Helm
+- Make
 
 ### Steps
 
@@ -25,7 +28,7 @@ To run the project locally, you can simply use Docker Desktop + Kubernetes
 2. Build Docker images and deploy to Kubernetes:
     ```sh
     cd ci
-    make create-all
+    make local
     ```
 3. Open your browser and navigate to `http://localhost/logger` to see the Ologami Logger interface.
 
